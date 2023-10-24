@@ -2,9 +2,13 @@
 #include <stdlib.h>
 #include <GL/glut.h>
 #include <math.h>
-#define PI 3.141926535
 
-float px, py, pdx, pdy, pa; //player position
+#define PI 3.141926535
+#define P2 PI/2
+#define P3 3*PI/2
+#define DR 0.0174533 //One degree in radians
+
+float px, py, pdx, pdy, pa; //Player position
 
 void drawPlayer(){
     glColor3f(1, 1, 0);
@@ -52,6 +56,121 @@ void drawMap2D(){
             glVertex2i(xo + mapS - 1, yo + 1);
             glEnd();
         }
+    }
+}
+
+float dist(float ax, float ay, float bx, float by, float ang){
+    return(sqrt((bx - ax) * bx - ax) + (by - ay) * (by - ay));
+}
+
+void drawRays2D(){
+    int r, mx, my, mp, dof;
+    float rx, ry, ra, xo, yo;
+    ra = pa - DR * 30;
+    if(ra < 0){
+        ra += 2 * PI;
+    }
+    if(ra > 2 * PI){
+        ra -= 2 * PI;
+    }
+    for(r = 0; r < 1; r++){
+        //Check horizontal lines
+        dof = 0;
+        float disH = 1000000, hx = px, hy = py;
+        float aTan = -1 / tan(ra);
+        if(ra > PI){
+            //Looking up
+            ry = (((int)py>>6)<<6)-0.0001;
+            rx = (py - ry) * aTan + px;
+            yo = -64;
+            xo = -yo * aTan;
+        }
+        if(ra < PI){
+            //Looking down
+            ry = (((int)py>>6)<<6)+64;
+            rx = (py - ry) * aTan + px;
+            yo = 64;
+            xo = -yo * aTan;
+        }
+        if(ra == 0 || ra == PI){
+            //Looking left or right
+            rx = px;
+            ry = py; 
+            dof = 8;
+        }
+        while(dof < 8){
+            mx = (int)(rx)>>6;
+            my = (int)(ry)>>6;
+            mp = my * mapX + mx;
+            if(mp > 0 && mp < mapX * mapY && map[mp] == 1){
+                //Hit wall
+                hx = rx;
+                hy = ry;
+                disH = dist(px, py, hx, hy, ra);
+                dof = 8;
+            } else {
+                //Next line
+                rx += xo;
+                ry += yo;
+                dof += 1;
+            }
+        }
+        
+        //Check vertical lines
+        dof = 0;
+        float disV = 1000000, vx = px, vy = py;
+        float nTan = -tan(ra);
+        if(ra > P2 && ra < P3){
+            //Looking left
+            rx = (((int)px>>6)<<6)-0.0001;
+            ry = (px - rx) * nTan + py;
+            xo = -64;
+            yo = -xo * nTan;
+        }
+        if(ra < P2 || ra > P3){
+            //Looking right
+            rx = (((int)px>>6)<<6)+64;
+            ry = (px - rx) * nTan + py;
+            xo = 64;
+            yo = -xo * nTan;
+        }
+        if(ra == 0 || ra == PI){
+            //Looking up or down
+            rx = px;
+            ry = py; 
+            dof = 8;
+        }
+        while(dof < 8){
+            mx = (int)(rx)>>6;
+            my = (int)(ry)>>6;
+            mp = my * mapX + mx;
+            if(mp > 0 && mp < mapX * mapY && map[mp] == 1){
+                //Hit wall
+                vx = rx;
+                vy = ry;
+                disV = dist(px, py, vx, vy, ra);
+                dof = 8;
+            } else {
+                //Next line
+                rx += xo;
+                ry += yo;
+                dof += 1;
+            }
+        }
+        if(disV < disH){
+            rx = vx;
+            ry = vy;
+        }
+        if(disH < disV){
+            rx = hx;
+            ry = hy;
+        }
+        glColor3f(1, 0, 0);
+        glLineWidth(3);
+        glBegin(GL_LINES);
+        glVertex2i(px, py);
+        glVertex2i(rx, ry);
+        glEnd();
     }
 }
 
