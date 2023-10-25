@@ -3,12 +3,9 @@
 #include <GL/glut.h>
 #include <math.h>
 
-#define PI 3.141926535
-#define P2 PI/2
-#define P3 3*PI/2
-#define DR 0.0174533 //One degree in radians
+#define PI 3.1415926535
 
-float px, py, pdx, pdy, pa; //Player position
+float px, py, pdx, pdy, pa; //player position
 
 void drawPlayer(){
     glColor3f(1, 1, 0);
@@ -59,35 +56,24 @@ void drawMap2D(){
     }
 }
 
-float dist(float ax, float ay, float bx, float by, float ang){
-    return(sqrt((bx - ax) * bx - ax) + (by - ay) * (by - ay));
-}
-
 void drawRays2D(){
     int r, mx, my, mp, dof;
-    float rx, ry, ra, xo, yo, disT;
-    ra = pa - DR * 30;
-    if(ra < 0){
-        ra += 2 * PI;
-    }
-    if(ra > 2 * PI){
-        ra -= 2 * PI;
-    }
-    for(r = 0; r < 60; r++){
+    float rx, ry, ra, xo, yo;
+    ra = pa;
+    for(r = 0; r < 1; r++){
         //Check horizontal lines
         dof = 0;
-        float disH = 1000000, hx = px, hy = py;
         float aTan = -1 / tan(ra);
         if(ra > PI){
             //Looking up
-            ry = (((int)py>>6)<<6)-0.0001;
+            ry = (((int)py>>6)<<6) - 0.0001;
             rx = (py - ry) * aTan + px;
             yo = -64;
             xo = -yo * aTan;
         }
         if(ra < PI){
             //Looking down
-            ry = (((int)py>>6)<<6)+64;
+            ry = (((int)py>>6)<<6) + 64;
             rx = (py - ry) * aTan + px;
             yo = 64;
             xo = -yo * aTan;
@@ -95,18 +81,15 @@ void drawRays2D(){
         if(ra == 0 || ra == PI){
             //Looking left or right
             rx = px;
-            ry = py; 
+            ry = py;
             dof = 8;
         }
         while(dof < 8){
             mx = (int)(rx)>>6;
             my = (int)(ry)>>6;
             mp = my * mapX + mx;
-            if(mp > 0 && mp < mapX * mapY && map[mp] == 1){
+            if(mp < mapX * mapY && map[mp] == 1){
                 //Hit wall
-                hx = rx;
-                hy = ry;
-                disH = dist(px, py, hx, hy, ra);
                 dof = 8;
             } else {
                 //Next line
@@ -115,115 +98,20 @@ void drawRays2D(){
                 dof += 1;
             }
         }
-        
-        //Check vertical lines
-        dof = 0;
-        float disV = 1000000, vx = px, vy = py;
-        float nTan = -tan(ra);
-        if(ra > P2 && ra < P3){
-            //Looking left
-            rx = (((int)px>>6)<<6)-0.0001;
-            ry = (px - rx) * nTan + py;
-            xo = -64;
-            yo = -xo * nTan;
-        }
-        if(ra < P2 || ra > P3){
-            //Looking right
-            rx = (((int)px>>6)<<6)+64;
-            ry = (px - rx) * nTan + py;
-            xo = 64;
-            yo = -xo * nTan;
-        }
-        if(ra == 0 || ra == PI){
-            //Looking up or down
-            rx = px;
-            ry = py; 
-            dof = 8;
-        }
-        while(dof < 8){
-            mx = (int)(rx)>>6;
-            my = (int)(ry)>>6;
-            mp = my * mapX + mx;
-            if(mp > 0 && mp < mapX * mapY && map[mp] == 1){
-                //Hit wall
-                vx = rx;
-                vy = ry;
-                disV = dist(px, py, vx, vy, ra);
-                dof = 8;
-            } else {
-                //Next line
-                rx += xo;
-                ry += yo;
-                dof += 1;
-            }
-        }
-        if(disV < disH){
-            rx = vx;
-            ry = vy;
-            disT = disV;
-        }
-        if(disH < disV){
-            rx = hx;
-            ry = hy;
-            disT = disH;
-        }
-        if(disV < disH){
-            //Vertical wall hit
-            rx = vx;
-            ry = vy;
-            disT = disV;
-            glColor3f(0.9, 0, 0);
-        }
-        if(disH < disV){
-            //Horizontal wall hit
-            rx = hx;
-            ry = hy;
-            disT = disH;
-            glColor3f(0.7, 0, 0);
-        }
-        
-        glLineWidth(3);
+        glColor3f(0, 1, 0);
+        glLineWidth(1);
         glBegin(GL_LINES);
         glVertex2i(px, py);
         glVertex2i(rx, ry);
         glEnd();
-        
-        //Draw 3D Walls
-        float ca = pa - ra;
-        if(ca < 0){
-            ca += 2 * PI;
-        }
-        if(ca > 2 * PI){
-            ca -= 2 * PI;
-        }
-        disT = disT * cos(ca); //Fix fisheye effect
-        float lineH = (mapS * 320) / disT;
-        if(lineH > 320){
-            lineH = 320; //Line height
-        }
-        float lineO = 160 - lineH / 2; //Line offset
-        glLineWidth(8);
-        glBegin(GL_LINES);
-        glVertex2i(r * 8 + 530, lineO);
-        glVertex2i(r * 8 + 530, lineH + lineO);
-        glEnd();
-        
-        
-        ra += DR;
-        if(ra < 0){
-            ra += 2 * PI;
-        }
-        if(ra > 2 * PI){
-            ra -= 2 * PI;
-        }
     }
 }
 
 void display(){
      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
      drawMap2D();
-     drawRays2D();
      drawPlayer();
+     drawRays2D();
      glutSwapBuffers();
 }
 
@@ -234,7 +122,7 @@ void buttons(unsigned char key, int x, int y){
             pa += 2 * PI;
         }
         pdx = cos(pa) * 5;
-        pdy = sin(pa) *5;
+        pdy = sin(pa) * 5;
     }
     if(key == 'd'){
         pa += 0.1;
@@ -242,7 +130,7 @@ void buttons(unsigned char key, int x, int y){
             pa -= 2 * PI;
         }
         pdx = cos(pa) * 5;
-        pdy = sin(pa) * 5;
+        pdy = sin(pa) * 5;;
     }
     if(key == 'w'){
         px += pdx;
@@ -261,7 +149,7 @@ void init(){
      px = 300;
      py = 300;
      pdx = cos(pa) * 5;
-     pdy = sin(pa) *5;
+     pdy = sin(pa) * 5;
 }
 
 int main(int argc, char** argv){ 
