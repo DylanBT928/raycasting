@@ -65,7 +65,7 @@ float dist(float ax, float ay, float bx, float by, float ang){
 
 void drawRays2D(){
     int r, mx, my, mp, dof;
-    float rx, ry, ra, xo, yo;
+    float rx, ry, ra, xo, yo, disT;
     ra = pa - DR * 30;
     if(ra < 0){
         ra += 2 * PI;
@@ -73,7 +73,7 @@ void drawRays2D(){
     if(ra > 2 * PI){
         ra -= 2 * PI;
     }
-    for(r = 0; r < 1; r++){
+    for(r = 0; r < 60; r++){
         //Check horizontal lines
         dof = 0;
         float disH = 1000000, hx = px, hy = py;
@@ -160,23 +160,69 @@ void drawRays2D(){
         if(disV < disH){
             rx = vx;
             ry = vy;
+            disT = disV;
         }
         if(disH < disV){
             rx = hx;
             ry = hy;
+            disT = disH;
         }
-        glColor3f(1, 0, 0);
+        if(disV < disH){
+            //Vertical wall hit
+            rx = vx;
+            ry = vy;
+            disT = disV;
+            glColor3f(0.9, 0, 0);
+        }
+        if(disH < disV){
+            //Horizontal wall hit
+            rx = hx;
+            ry = hy;
+            disT = disH;
+            glColor3f(0.7, 0, 0);
+        }
+        
         glLineWidth(3);
         glBegin(GL_LINES);
         glVertex2i(px, py);
         glVertex2i(rx, ry);
         glEnd();
+        
+        //Draw 3D Walls
+        float ca = pa - ra;
+        if(ca < 0){
+            ca += 2 * PI;
+        }
+        if(ca > 2 * PI){
+            ca -= 2 * PI;
+        }
+        disT = disT * cos(ca); //Fix fisheye effect
+        float lineH = (mapS * 320) / disT;
+        if(lineH > 320){
+            lineH = 320; //Line height
+        }
+        float lineO = 160 - lineH / 2; //Line offset
+        glLineWidth(8);
+        glBegin(GL_LINES);
+        glVertex2i(r * 8 + 530, lineO);
+        glVertex2i(r * 8 + 530, lineH + lineO);
+        glEnd();
+        
+        
+        ra += DR;
+        if(ra < 0){
+            ra += 2 * PI;
+        }
+        if(ra > 2 * PI){
+            ra -= 2 * PI;
+        }
     }
 }
 
 void display(){
      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
      drawMap2D();
+     drawRays2D();
      drawPlayer();
      glutSwapBuffers();
 }
