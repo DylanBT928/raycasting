@@ -6,6 +6,7 @@
 #define PI 3.1415926535
 #define P2 PI/2
 #define P3 3*PI/2
+#define DR 0.0174533 //One degree in radians
 
 float px, py, pdx, pdy, pa; //player position
 
@@ -27,12 +28,12 @@ int mapX = 8, mapY = 8, mapS = 64;
 int map[] = 
 {
     1, 1, 1, 1, 1, 1, 1, 1,
+    1, 0, 0, 0, 0, 0, 1, 1,
     1, 0, 1, 0, 0, 0, 0, 1,
-    1, 0, 1, 0, 0, 0, 0, 1,
-    1, 0, 1, 0, 0, 0, 0, 1,
+    1, 0, 1, 1, 0, 0, 0, 1,
     1, 0, 0, 0, 0, 0, 0, 1,
     1, 0, 0, 0, 0, 1, 0, 1,
-    1, 0, 0, 0, 0, 0, 0, 1,
+    1, 0, 0, 0, 0, 1, 0, 1,
     1, 1, 1, 1, 1, 1, 1, 1,
 };
 
@@ -58,13 +59,24 @@ void drawMap2D(){
     }
 }
 
+float dist(float ax, float ay, float bx, float by, float ang){
+    return (sqrt((bx - ax)*(bx - ax) + (by - ay)*(by - ay)));
+}
+
 void drawRays2D(){
     int r, mx, my, mp, dof;
-    float rx, ry, ra, xo, yo;
-    ra = pa;
-    for(r = 0; r < 1; r++){
+    float rx, ry, ra, xo, yo, disT;
+    ra = pa - DR * 30;
+    if(ra < 0){
+        ra += 2 * PI;
+    }
+    if(ra > 2 * PI){
+        ra -= 2 * PI;
+    }
+    for(r = 0; r < 60; r++){
         //Check horizontal lines
         dof = 0;
+        float disH = 1000000, hx = px, hy = py;
         float aTan = -1 / tan(ra);
         if(ra > PI){
             //Looking up
@@ -90,8 +102,11 @@ void drawRays2D(){
             mx = (int)(rx)>>6;
             my = (int)(ry)>>6;
             mp = my * mapX + mx;
-            if(mp < mapX * mapY && map[mp] == 1){
+            if(mp > 0 && mp < mapX * mapY && map[mp] == 1){
                 //Hit wall
+                hx = rx;
+                hy = ry;
+                disH = dist(px, py, hx, hy, ra);
                 dof = 8;
             } else {
                 //Next line
@@ -100,15 +115,10 @@ void drawRays2D(){
                 dof += 1;
             }
         }
-        glColor3f(0, 1, 0);
-        glLineWidth(10);
-        glBegin(GL_LINES);
-        glVertex2i(px, py);
-        glVertex2i(rx, ry);
-        glEnd();
         
         //Check vertical lines
         dof = 0;
+        float disV = 1000000, vx = px, vy = py;
         float nTan = -tan(ra);
         if(ra > P2 && ra < P3){
             //Looking left
@@ -134,8 +144,11 @@ void drawRays2D(){
             mx = (int)(rx)>>6;
             my = (int)(ry)>>6;
             mp = my * mapX + mx;
-            if(mp < mapX * mapY && map[mp] == 1){
+            if(mp > 0 && mp < mapX * mapY && map[mp] == 1){
                 //Hit wall
+                vx = rx;
+                vy = ry;
+                disV = dist(px, py, vx, vy, ra);
                 dof = 8;
             } else {
                 //Next line
@@ -144,20 +157,61 @@ void drawRays2D(){
                 dof += 1;
             }
         }
-        glColor3f(1, 0, 0);
-        glLineWidth(3);
+        if(disV < disH){
+            //Vertical wall hit
+            rx = vx;
+            ry = vy;
+            disT = disV;
+            glColor3f(0, 0.9, 0);
+        }
+        if(disH < disV){
+            //Horizontal wall hit
+            rx = hx;
+            ry = hy;
+            disT = disH;
+            glColor3f(0, 0.7, 0);
+        }
+        glLineWidth(2);
         glBegin(GL_LINES);
         glVertex2i(px, py);
         glVertex2i(rx, ry);
         glEnd();
+        
+        //Draw 3D walls
+        float ca = pa - ra;
+        if(ca < 0){
+            ca += 2 * PI;
+        }
+        if(ca > 2 * PI){
+            ca -= 2 * PI;
+        }
+        disT *= cos(ca); //Fix fisheye
+        float lineH = (mapS * 320) / disT;
+        if(lineH > 320){
+            lineH = 320; //Line height
+        }
+        float lineO = 160 - lineH/2; //Line offset
+        glLineWidth(8);
+        glBegin(GL_LINES);
+        glVertex2i(r * 8 + 530, lineO);
+        glVertex2i(r * 8 + 530, lineH + lineO);
+        glEnd();
+        
+        ra += DR;
+        if(ra < 0){
+            ra += 2 * PI;
+        }
+        if(ra > 2 * PI){
+            ra -= 2 * PI;
+        }
     }
 }
 
 void display(){
      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
      drawMap2D();
-     drawPlayer();
      drawRays2D();
+     drawPlayer();
      glutSwapBuffers();
 }
 
