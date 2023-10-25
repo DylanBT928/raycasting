@@ -4,6 +4,8 @@
 #include <math.h>
 
 #define PI 3.1415926535
+#define P2 PI/2
+#define P3 3*PI/2
 
 float px, py, pdx, pdy, pa; //player position
 
@@ -99,7 +101,51 @@ void drawRays2D(){
             }
         }
         glColor3f(0, 1, 0);
-        glLineWidth(1);
+        glLineWidth(10);
+        glBegin(GL_LINES);
+        glVertex2i(px, py);
+        glVertex2i(rx, ry);
+        glEnd();
+        
+        //Check vertical lines
+        dof = 0;
+        float nTan = -tan(ra);
+        if(ra > P2 && ra < P3){
+            //Looking left
+            rx = (((int)px>>6)<<6) - 0.0001;
+            ry = (px - rx) * nTan + py;
+            xo = -64;
+            yo = -xo * nTan;
+        }
+        if(ra < P2 || ra > P3){
+            //Looking right
+            rx = (((int)px>>6)<<6) + 64;
+            ry = (px - rx) * nTan + py;
+            xo = 64;
+            yo = -xo * nTan;
+        }
+        if(ra == 0 || ra == PI){
+            //Looking up or down
+            rx = px;
+            ry = py;
+            dof = 8;
+        }
+        while(dof < 8){
+            mx = (int)(rx)>>6;
+            my = (int)(ry)>>6;
+            mp = my * mapX + mx;
+            if(mp < mapX * mapY && map[mp] == 1){
+                //Hit wall
+                dof = 8;
+            } else {
+                //Next line
+                rx += xo;
+                ry += yo;
+                dof += 1;
+            }
+        }
+        glColor3f(1, 0, 0);
+        glLineWidth(3);
         glBegin(GL_LINES);
         glVertex2i(px, py);
         glVertex2i(rx, ry);
