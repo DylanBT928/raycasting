@@ -253,10 +253,17 @@ void init(){
      pdy = sin(pa) * 5;
 }
 
+float frame1, frame2, fps;
+
 void display(){
+    //Frames per second
+    frame2 = glutGet(GLUT_ELAPSED_TIME);
+    fps = frame2 - frame1;
+    frame1 = glutGet(GLUT_ELAPSED_TIME);
+    
     //Buttons
     if(Keys.a == 1){
-        pa -= 0.1;
+        pa -= 0.005 * fps;
         if(pa < 0){
             pa += 2 * PI;
         }
@@ -264,20 +271,43 @@ void display(){
         pdy = sin(pa) * 5;
     }
     if(Keys.d == 1){
-        pa += 0.1;
+        pa += 0.005 * fps;
         if(pa > 2 * PI){
             pa -= 2 * PI;
         }
         pdx = cos(pa) * 5;
         pdy = sin(pa) * 5;;
     }
+    
+    int xo = 0, yo = 0;
+    if(pdx < 0){
+        xo = -20;
+    } else {
+        xo = 20;
+    }
+    if(pdy < 0){
+        yo = -20;
+    } else {
+        yo = 20;
+    }
+    int ipx = px / 64.0, ipx_add_xo = (px + xo) / 64.0, ipx_sub_xo = (px - xo) / 64.0;
+    int ipy = py / 64.0, ipy_add_yo = (py + yo) / 64.0, ipy_sub_yo = (py - yo) / 64.0;
+    
     if(Keys.w == 1){
-        px += pdx;
-        py += pdy;
+        if(map[ipy * mapX + ipx_add_xo] == 0){
+            px += pdx * 0.05 * fps;
+        }
+        if(map[ipy_add_yo * mapX + ipx] == 0){
+            py += pdy * 0.05 * fps;
+        }
     }
     if(Keys.s == 1){
-        px -= pdx;
-        py -= pdy;
+        if(map[ipy * mapX + ipx_sub_xo] == 0){
+            px -= pdx * 0.05 * fps;
+        }
+        if(map[ipy_sub_yo * mapX + ipx] == 0){
+            py -= pdy * 0.05 * fps;
+        }
     }
     glutPostRedisplay();
     
