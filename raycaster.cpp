@@ -3,12 +3,17 @@
 #include <GL/glut.h>
 #include <math.h>
 
+typedef struct {
+    int w, a, s, d; //Button state on/off
+} ButtonKeys;
+ButtonKeys Keys;
+
 #define PI 3.1415926535
 #define P2 PI/2
 #define P3 3*PI/2
 #define DR 0.0174533 //One degree in radians
 
-float px, py, pdx, pdy, pa; //player position
+float px, py, pdx, pdy, pa; //Player position
 
 void drawPlayer(){
     glColor3f(1, 1, 0);
@@ -28,12 +33,12 @@ int mapX = 8, mapY = 8, mapS = 64;
 int map[] = 
 {
     1, 1, 1, 1, 1, 1, 1, 1,
-    1, 0, 0, 0, 0, 0, 1, 1,
-    1, 0, 1, 0, 0, 0, 0, 1,
-    1, 0, 1, 1, 0, 0, 0, 1,
+    1, 0, 0, 1, 0, 0, 0, 1,
+    1, 0, 0, 0, 0, 1, 0, 1,
+    1, 1, 0, 1, 0, 0, 0, 1,
     1, 0, 0, 0, 0, 0, 0, 1,
-    1, 0, 0, 0, 0, 1, 0, 1,
-    1, 0, 0, 0, 0, 1, 0, 1,
+    1, 0, 0, 0, 0, 0, 0, 1,
+    1, 0, 0, 0, 0, 0, 1, 1,
     1, 1, 1, 1, 1, 1, 1, 1,
 };
 
@@ -207,38 +212,34 @@ void drawRays2D(){
     }
 }
 
-void display(){
-     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-     drawMap2D();
-     drawRays2D();
-     drawPlayer();
-     glutSwapBuffers();
-}
-
-void buttons(unsigned char key, int x, int y){
+void buttonDown(unsigned char key, int x, int y){
     if(key == 'a'){
-        pa -= 0.1;
-        if(pa < 0){
-            pa += 2 * PI;
-        }
-        pdx = cos(pa) * 5;
-        pdy = sin(pa) * 5;
+        Keys.a = 1;
     }
     if(key == 'd'){
-        pa += 0.1;
-        if(pa > 2 * PI){
-            pa -= 2 * PI;
-        }
-        pdx = cos(pa) * 5;
-        pdy = sin(pa) * 5;;
+        Keys.d = 1;
     }
     if(key == 'w'){
-        px += pdx;
-        py += pdy;
+        Keys.w = 1;
     }
     if(key == 's'){
-        px -= pdx;
-        py -= pdy;
+        Keys.s = 1;
+    }
+    glutPostRedisplay();
+}
+
+void buttonUp(unsigned char key, int x, int y){
+    if(key == 'a'){
+        Keys.a = 0;
+    }
+    if(key == 'd'){
+        Keys.d = 0;
+    }
+    if(key == 'w'){
+        Keys.w = 0;
+    }
+    if(key == 's'){
+        Keys.s = 0;
     }
     glutPostRedisplay();
 }
@@ -252,13 +253,55 @@ void init(){
      pdy = sin(pa) * 5;
 }
 
+void display(){
+    //Buttons
+    if(Keys.a == 1){
+        pa -= 0.1;
+        if(pa < 0){
+            pa += 2 * PI;
+        }
+        pdx = cos(pa) * 5;
+        pdy = sin(pa) * 5;
+    }
+    if(Keys.d == 1){
+        pa += 0.1;
+        if(pa > 2 * PI){
+            pa -= 2 * PI;
+        }
+        pdx = cos(pa) * 5;
+        pdy = sin(pa) * 5;;
+    }
+    if(Keys.w == 1){
+        px += pdx;
+        py += pdy;
+    }
+    if(Keys.s == 1){
+        px -= pdx;
+        py -= pdy;
+    }
+    glutPostRedisplay();
+    
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    drawMap2D();
+    drawRays2D();
+    drawPlayer();
+    glutSwapBuffers();
+}
+
+void resize(int w, int h){
+    glutReshapeWindow(1024, 512);
+}
+
 int main(int argc, char** argv){ 
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
     glutInitWindowSize(1024, 512);
+    glutInitWindowPosition(200, 200);
     glutCreateWindow("Raycasting");
     init();
     glutDisplayFunc(display);
-    glutKeyboardFunc(buttons);
+    glutReshapeFunc(resize);
+    glutKeyboardFunc(buttonDown);
+    glutKeyboardUpFunc(buttonUp);
     glutMainLoop();
 }
