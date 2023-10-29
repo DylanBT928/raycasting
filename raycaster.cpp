@@ -28,7 +28,7 @@ void drawPlayer(){
     glColor3f(1, 1, 0);
     glPointSize(8);
     glBegin(GL_POINTS);
-    glVertex2i(px,py);
+    glVertex2i(px, py);
     glEnd();
     
     glLineWidth(3);
@@ -197,9 +197,9 @@ int mapW[] =
     //Wall map
     1, 1, 1, 1, 1, 1, 1, 1,
     1, 0, 0, 1, 0, 0, 0, 1,
-    1, 0, 0, 0, 0, 1, 0, 1,
-    1, 1, 0, 1, 0, 0, 0, 1,
     1, 0, 0, 0, 0, 0, 0, 1,
+    1, 0, 0, 1, 0, 0, 0, 1,
+    1, 1, 0, 1, 0, 0, 0, 1,
     1, 0, 0, 0, 0, 0, 0, 1,
     1, 0, 0, 0, 0, 0, 1, 1,
     1, 1, 1, 1, 1, 1, 1, 1
@@ -209,9 +209,9 @@ int mapF[] =
     //Floor map
     0, 0, 0, 0, 0, 0, 0, 0,
     0, 1, 1, 0, 1, 1, 1, 0,
-    0, 1, 1, 1, 1, 0, 1, 0,
-    0, 0, 1, 0, 1, 1, 1, 0,
     0, 1, 1, 1, 1, 1, 1, 0,
+    0, 1, 1, 0, 1, 1, 1, 0,
+    0, 0, 1, 0, 1, 1, 1, 0,
     0, 1, 1, 1, 1, 1, 1, 0,
     0, 1, 1, 1, 1, 1, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0
@@ -221,9 +221,9 @@ int mapC[] =
     //Ceiling map
     0, 0, 0, 0, 0, 0, 0, 0,
     0, 1, 1, 0, 1, 1, 1, 0,
-    0, 1, 1, 1, 1, 0, 1, 0,
-    0, 0, 1, 0, 1, 1, 1, 0,
     0, 1, 1, 1, 1, 1, 1, 0,
+    0, 1, 1, 0, 1, 1, 1, 0,
+    0, 0, 1, 0, 1, 1, 1, 0,
     0, 1, 1, 1, 1, 1, 1, 0,
     0, 1, 1, 1, 1, 1, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0
@@ -367,7 +367,9 @@ void drawRays2D(){
                 dof += 1;
             }
         }
+        float shade = 1;
         if(disV < disH){
+            shade = 0.6;
             //Vertical wall hit
             rx = vx;
             ry = vy;
@@ -397,15 +399,30 @@ void drawRays2D(){
         }
         disT *= cos(ca); //Fix fisheye
         float lineH = (mapS * 320) / disT;
+        float tyStep = 32.0 / (float)lineH, tyOff = 0;;
         if(lineH > 320){
+            tyOff = (lineH - 320) / 2.0;
             lineH = 320; //Line height
         }
         float lineO = 160 - lineH/2; //Line offset
-        glLineWidth(8);
-        glBegin(GL_LINES);
-        glVertex2i(r * 8 + 530, lineO);
-        glVertex2i(r * 8 + 530, lineH + lineO);
-        glEnd();
+        
+        int y;
+        float tx = (int)(rx / 2.0)%32, ty = tyOff * tyStep;
+        if(ra > 180){
+            tx = 31 - tx;
+        }
+        for(y = 0; y < lineH; y++){
+            float c = allTextures[(int)(ty)*32 + (int)(tx)] * shade;
+            glColor3f(c, c, c);
+            
+            //Draw vertical wall
+            glPointSize(8);
+            glBegin(GL_POINTS);
+            glVertex2i(r * 8 + 530, lineO + y);
+            glEnd();
+            
+            ty += tyStep;
+        }
         
         ra += DR;
         if(ra < 0){
@@ -468,7 +485,7 @@ void display(){
     
     //Buttons
     if(Keys.a == 1){
-        pa -= 0.005 * fps;
+        pa -= 0.004 * fps;
         if(pa < 0){
             pa += 2 * PI;
         }
@@ -476,7 +493,7 @@ void display(){
         pdy = sin(pa) * 5;
     }
     if(Keys.d == 1){
-        pa += 0.005 * fps;
+        pa += 0.004 * fps;
         if(pa > 2 * PI){
             pa -= 2 * PI;
         }
@@ -500,18 +517,18 @@ void display(){
     
     if(Keys.w == 1){
         if(mapW[ipy * mapX + ipx_add_xo] == 0){
-            px += pdx * 0.05 * fps;
+            px += pdx * 0.03 * fps;
         }
         if(mapW[ipy_add_yo * mapX + ipx] == 0){
-            py += pdy * 0.05 * fps;
+            py += pdy * 0.03 * fps;
         }
     }
     if(Keys.s == 1){
         if(mapW[ipy * mapX + ipx_sub_xo] == 0){
-            px -= pdx * 0.05 * fps;
+            px -= pdx * 0.03 * fps;
         }
         if(mapW[ipy_sub_yo * mapX + ipx] == 0){
-            py -= pdy * 0.05 * fps;
+            py -= pdy * 0.03 * fps;
         }
     }
     glutPostRedisplay();
