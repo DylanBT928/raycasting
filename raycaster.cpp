@@ -407,9 +407,17 @@ void drawRays2D(){
         float lineO = 160 - lineH/2; //Line offset
         
         int y;
-        float tx = (int)(rx / 2.0)%32, ty = tyOff * tyStep;
-        if(ra > 180){
-            tx = 31 - tx;
+        float tx, ty = tyOff * tyStep;
+        if(shade == 1){
+            tx = (int)(rx / 2.0)%32;
+            if(ra > 0 && ra < PI){
+                tx = 31 - tx;
+            }
+        } else {
+            tx = (int)(ry / 2.0)%32;
+            if(ra > P2 && ra < P3){
+                tx = 31 - tx;
+            }
         }
         for(y = 0; y < lineH; y++){
             float c = allTextures[(int)(ty)*32 + (int)(tx)] * shade;
