@@ -195,14 +195,14 @@ int mapX = 8, mapY = 8, mapS = 64;
 int mapW[] = 
 {
     //Wall map
-    1, 1, 1, 1, 1, 1, 1, 1,
-    1, 0, 0, 1, 0, 0, 0, 1,
-    1, 0, 0, 0, 0, 0, 0, 1,
-    1, 0, 0, 1, 0, 0, 0, 1,
-    1, 1, 0, 1, 0, 0, 0, 1,
-    1, 0, 0, 0, 0, 0, 0, 1,
-    1, 0, 0, 0, 0, 0, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1
+    1, 1, 3, 2, 2, 2, 2, 1,
+    1, 0, 0, 2, 0, 0, 0, 2,
+    3, 0, 0, 4, 0, 0, 0, 2,
+    1, 0, 0, 3, 0, 0, 0, 2,
+    1, 2, 4, 2, 0, 0, 0, 2,
+    2, 0, 0, 0, 0, 0, 0, 2,
+    2, 0, 0, 0, 0, 0, 2, 2,
+    1, 2, 2, 2, 2, 2, 2, 1
 };
 int mapF[] =
 {
@@ -233,7 +233,7 @@ void drawMap2D(){
     int x, y, xo, yo;
     for(y = 0; y < mapY; y++){
         for(x = 0; x < mapX; x++){
-            if(mapW[y * mapX + x] == 1){
+            if(mapW[y * mapX + x] > 0){
                 glColor3f(1, 1, 1);
             } else {
                 glColor3f(0, 0, 0);
@@ -284,6 +284,7 @@ void drawRays2D(){
         ra -= 2 * PI;
     }
     for(r = 0; r < 60; r++){
+        int vmt = 0, hmt = 0; //Vertical and horizontal map texture number
         //Check horizontal lines
         dof = 0;
         float disH = 1000000, hx = px, hy = py;
@@ -312,7 +313,8 @@ void drawRays2D(){
             mx = (int)(rx)>>6;
             my = (int)(ry)>>6;
             mp = my * mapX + mx;
-            if(mp > 0 && mp < mapX * mapY && mapW[mp] == 1){
+            if(mp > 0 && mp < mapX * mapY && mapW[mp] > 0){
+                hmt = mapW[mp] - 1;
                 //Hit wall
                 hx = rx;
                 hy = ry;
@@ -354,7 +356,8 @@ void drawRays2D(){
             mx = (int)(rx)>>6;
             my = (int)(ry)>>6;
             mp = my * mapX + mx;
-            if(mp > 0 && mp < mapX * mapY && mapW[mp] == 1){
+            if(mp > 0 && mp < mapX * mapY && mapW[mp] > 0){
+                vmt = mapW[mp] - 1;
                 //Hit wall
                 vx = rx;
                 vy = ry;
@@ -369,6 +372,7 @@ void drawRays2D(){
         }
         float shade = 1;
         if(disV < disH){
+            hmt = vmt;
             shade = 0.6;
             //Vertical wall hit
             rx = vx;
@@ -377,6 +381,7 @@ void drawRays2D(){
             glColor3f(0, 0.9, 0);
         }
         if(disH < disV){
+            vmt = hmt;
             //Horizontal wall hit
             rx = hx;
             ry = hy;
@@ -406,8 +411,9 @@ void drawRays2D(){
         }
         float lineO = 160 - lineH/2; //Line offset
         
+        //Draw walls
         int y;
-        float tx, ty = tyOff * tyStep;
+        float tx, ty = tyOff * tyStep + hmt * 32;
         if(shade == 1){
             tx = (int)(rx / 2.0)%32;
             if(ra > 0 && ra < PI){
@@ -421,7 +427,18 @@ void drawRays2D(){
         }
         for(y = 0; y < lineH; y++){
             float c = allTextures[(int)(ty)*32 + (int)(tx)] * shade;
-            glColor3f(c, c, c);
+            if(hmt == 0){
+                glColor3f(c, c / 2.0, c / 2.0); //Red checkerboard
+            }
+            if(hmt == 1){
+                glColor3f(c, c, c / 2.0); //Yellow brick
+            }
+            if(hmt == 2){
+                glColor3f(c / 2.0, c / 2.0, c); //Blue window
+            }
+            if(hmt == 3){
+                glColor3f(c / 2.0, c, c / 2.0); //Green door
+            }
             
             //Draw vertical wall
             glPointSize(8);
@@ -430,6 +447,11 @@ void drawRays2D(){
             glEnd();
             
             ty += tyStep;
+        }
+        
+        //Draw floors
+        for(y = lineO + lineH; y < 320; y++){
+            
         }
         
         ra += DR;
@@ -454,6 +476,25 @@ void buttonDown(unsigned char key, int x, int y){
     }
     if(key == 's'){
         Keys.s = 1;
+    }
+    if(key == 'e'){
+        //Opens doors
+        int xo = 0, yo = 0;
+        if(pdx < 0){
+            xo = -25;
+        } else {
+            xo = 25;
+        }
+        if(pdy < 0){
+            yo = -25;
+        } else {
+            yo = 25;
+        }
+        int ipx = px / 64.0, ipx_add_xo = (px + xo) / 64.0;
+        int ipy = py / 64.0, ipy_add_yo = (py + yo) / 64.0;
+        if(mapW[ipy_add_yo * mapX + ipx_add_xo] == 4){
+            mapW[ipy_add_yo * mapX + ipx_add_xo] = 0;
+        }
     }
     glutPostRedisplay();
 }
