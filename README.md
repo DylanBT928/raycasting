@@ -10,8 +10,5 @@ Raycasting program in C/C++
 ## v0.9
 <img src="/previews/v0.9.png" style="width: 600px; height: 300px;">
 
-## v0.9
-<img src="/previews/v0.9.png" style="width: 600px; height: 300px;">
-
 ## v0.8
 <img src="/previews/v0.8.png" style="width: 600px; height: 300px;">
