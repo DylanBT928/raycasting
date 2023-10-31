@@ -3,7 +3,8 @@ Raycasting program in C/C++
 
 #### Features:
 - Moveable player with visible rays
-- Renders 3D walls with shading and textures
+- Renders 3D walls with shading
+- Textures on walls, floor, and ceiling
 - Small 8x8 map
 
 ## v0.9
