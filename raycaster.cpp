@@ -37,38 +37,38 @@ typedef struct{
 */
 int mapW[]={
  //Walls
- 1,1,1,1,1,3,1,1,
+ 1,1,1,1,1,4,1,1,
  1,0,0,1,0,0,0,1,
- 1,0,0,4,0,2,0,1,
- 1,1,4,1,0,0,0,1,
- 2,0,0,0,0,0,0,1,
- 2,0,0,0,0,1,0,1,
- 2,0,0,0,0,0,0,1,
- 1,1,2,3,4,5,6,1,	
+ 1,0,0,2,0,1,0,1,
+ 1,1,2,1,0,0,0,1,
+ 1,0,0,0,0,0,0,1,
+ 1,0,0,0,0,1,0,1,
+ 1,0,0,0,0,0,0,1,
+ 1,1,4,1,1,1,1,1,	
 };
 
 int mapF[]={
  //Floors
  0,0,0,0,0,0,0,0,
- 0,0,0,0,1,1,0,0,
- 0,0,0,0,2,0,0,0,
- 0,0,0,0,0,0,0,0,
- 0,0,2,0,0,0,0,0,
- 0,0,0,0,0,0,0,0,
- 0,1,1,1,1,0,0,0,
+ 0,2,2,2,2,2,2,0,
+ 0,2,2,2,2,2,2,0,
+ 0,2,2,2,2,2,2,0,
+ 0,2,2,2,2,2,2,0,
+ 0,2,2,2,2,2,2,0,
+ 0,2,2,2,2,2,2,0,
  0,0,0,0,0,0,0,0,	
 };
 
 int mapC[]={
  //Ceiling
  0,0,0,0,0,0,0,0,
- 0,0,0,0,0,0,0,0,
- 0,0,0,0,0,0,0,0,
- 0,0,0,0,0,0,1,0,
- 0,1,3,1,0,0,0,0,
- 0,0,0,0,0,0,0,0,
- 0,0,0,0,0,0,0,0,
- 0,0,0,0,0,0,0,0,	
+ 0,2,2,2,2,2,2,0,
+ 0,2,2,2,2,2,2,0,
+ 0,2,2,2,2,2,2,0,
+ 0,2,2,2,2,2,2,0,
+ 0,2,2,2,2,2,2,0,
+ 0,2,2,2,2,2,2,0,
+ 0,0,0,0,0,0,0,0,			
 };
 
 void drawMap2D(){
@@ -263,24 +263,33 @@ void drawRays2D(){
             ty+=ty_step;
         }
  
-        //Draw floors
         for(y=lineOff+lineH;y<320;y++){
             float dy=y-(320/2.0), deg=degToRad(ra), raFix=cos(degToRad(FixAng(pa-ra)));
             tx=px/2 + cos(deg)*158*32/dy/raFix;
             ty=py/2 - sin(deg)*158*32/dy/raFix;
-            int mp=mapF[(int)(ty/32.0)*mapX+(int)(tx/32.0)]*32*32;
-            float c=All_Textures[((int)(ty)&31)*32 + ((int)(tx)&31)+mp]*0.7;
             
-            glColor3f(c/1.3,c/1.3,c);
+            //Draw floors
+            int pixel=(((int)(ty)&31)*32 + ((int)(tx)&31))*3+mp*3;
+            int red=All_Textures[pixel+0]*0.7;
+            int green=All_Textures[pixel+1]*0.7;
+            int blue=All_Textures[pixel+2]*0.7;
             glPointSize(8);
+            glColor3ub(red,green,blue);
             glBegin(GL_POINTS);
             glVertex2i(r*8+530,y);
             glEnd();
 
             //---Draw ceiling---
             mp=mapC[(int)(ty/32.0)*mapX+(int)(tx/32.0)]*32*32;
-            c=All_Textures[((int)(ty)&31)*32 + ((int)(tx)&31)+mp]*0.7;
-            glColor3f(c/2.0,c/1.2,c/2.0);glPointSize(8);glBegin(GL_POINTS);glVertex2i(r*8+530,320-y);glEnd();
+            pixel=(((int)(ty)&31)*32 + ((int)(tx)&31))*3+mp*3;
+            red=All_Textures[pixel+0];
+            green=All_Textures[pixel+1];
+            blue=All_Textures[pixel+2];
+            glPointSize(8);
+            glColor3ub(red,green,blue);
+            glBegin(GL_POINTS);
+            glVertex2i(r*8+530,320-y);
+            glEnd();
         }
  
         ra=FixAng(ra-1); //Go to next ray, 60 total
@@ -390,7 +399,7 @@ void ButtonDown(unsigned char key,int x,int y){
         } 
         int ipx=px/64.0, ipx_add_xo=(px+xo)/64.0;
         int ipy=py/64.0, ipy_add_yo=(py+yo)/64.0;
-        if(mapW[ipy_add_yo*mapX+ipx_add_xo]==4){ 
+        if(mapW[ipy_add_yo*mapX+ipx_add_xo]==2){ 
             mapW[ipy_add_yo*mapX+ipx_add_xo]=0;
         }
     }
