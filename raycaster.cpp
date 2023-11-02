@@ -26,15 +26,6 @@ typedef struct{
 #define mapY  8 //Map height
 #define mapS 64 //Map cube size
 
-/*
- * 0 - Blank
- * 1 - Wall
- * 2 - Door
- * 3 - Floor
- * 4 - Window
- * 5 - Ceiling
- * 6 - Win
-*/
 int mapW[]={
  //Walls
  1,1,1,1,1,4,1,1,
@@ -129,7 +120,7 @@ void drawRays2D(){
     for(r=0;r<60;r++){
         int vmt=0,hmt=0; //Certical and horizontal map texture number 
         
-        //---Vertical--- 
+        //Vertical 
         dof=0; side=0; disV=100000;
         float Tan=tan(degToRad(ra));
         if(cos(degToRad(ra))> 0.001){
@@ -166,7 +157,7 @@ void drawRays2D(){
         } 
         vx=rx; vy=ry;
 
-        //---Horizontal---
+        //Horizontal
         dof=0; disH=100000;
         Tan=1.0/Tan; 
         if(sin(degToRad(ra))> 0.001){ 
