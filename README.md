@@ -1,5 +1,5 @@
 # Raycasting
-Raycasting program in C/C++
+💡 Raycasting program in C/C++
 
 #### Features:
 - Moveable player with visible rays
