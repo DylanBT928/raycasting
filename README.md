@@ -1,12 +1,16 @@
 # Raycasting
 💡 Raycasting program in C/C++
 
-#### Features:
+### Features:
 - Moveable player with visible rays
 - Textures on walls, floor, and ceiling
 - Renders 3D walls
 - Including shading
 - Small 8x8 map
+
+### Raycasting explained:
+
+A point on the map sends out, or casts, multiple rays in a specific direction with a defined length. This allows us to see a 3-dimensional world from a particular location on that map. The length of a ray is dependant on how far a wall is, in order for the ray to collide with it. The 3D perspective is drawn according to the distance of each ray. Simply, a 2D map is converted to a 3D perspective of a dot that is looking in a specific direction.
 
 ## v1.0
 <img src="/previews/v1.0.png" style="width: 600px; height: 300px;">
