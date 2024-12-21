@@ -1,6 +1,6 @@
 # Raycasting 💡
 
-Ray-casting program in C++
+Raycasting program in C++
 
 
 ## Contributing
