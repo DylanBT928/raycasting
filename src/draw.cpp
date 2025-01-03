@@ -1,5 +1,8 @@
 #include "draw.h"
 
+// Degrees to radians
+float DR = 0.0174533;
+
 void drawMap() {
     for (int y = 0; y < mapY; y++) {
         for (int x = 0; x < mapX; x++) {
@@ -31,10 +34,15 @@ void drawPlayer() {
 }
 
 void drawRays() {
-    float rayX = 0, rayY = 0, offsetX = 0, offsetY = 0;
-    const float rayAngle = pAngle;
+    float rayX = 0, rayY = 0, offsetX = 0, offsetY = 0, disT = 0;
+    float rayAngle = pAngle - DR * 30;
 
-    for (int r = 0; r < 1; r++) {
+    if (rayAngle < 0)
+        rayAngle += 2 * M_PI;
+    if (rayAngle > 2 * M_PI)
+        rayAngle -= 2 * M_PI;
+
+    for (int r = 0; r < 60; r++) {
         // CHECK HORIZONTAL LINES
         int depthOfField = 0;
         const float aTan = -1 / tan(rayAngle);
@@ -133,20 +141,57 @@ void drawRays() {
             }
         }
 
+        // Vertical wall hit
         if (disV < disH) {
             rayX = vx;
             rayY = vy;
+            disT = disV;
+            glColor3f(0.9, 0, 0);
         }
+        // Horizontal wall hit
         else if (disH < disV) {
             rayX = hx;
             rayY = hy;
+            disT = disH;
+            glColor3f(0.7, 0, 0);
         }
 
-        glColor3f(1, 0, 0);
         glLineWidth(5);
         glBegin(GL_LINES);
         glVertex2f(px, py);
         glVertex2f(rayX, rayY);
         glEnd();
+
+        drawWalls(disT, rayAngle, r);
+
+        rayAngle += DR;
+        if (rayAngle < 0)
+            rayAngle += 2 * M_PI;
+        if (rayAngle > 2 * M_PI)
+            rayAngle -= 2 * M_PI;
     }
+}
+
+void drawWalls(float disT, const float rayAngle, const float r) {
+    float lineHeight = (mapSize * 512) / disT;
+    float sideRays = pAngle - rayAngle;
+
+    // Fix fisheye effect
+    if (sideRays < 0)
+        sideRays += 2 * M_PI;
+    if (sideRays > 2 * M_PI)
+        sideRays -= 2 * M_PI;
+    disT *= cos(sideRays);
+
+    // Line height
+    if (lineHeight > 512)
+        lineHeight = 512;
+
+    const float lineOffset = 256 - lineHeight / 2;
+
+    glLineWidth(20);
+    glBegin(GL_LINES);
+    glVertex2f(r * 8 + 530, lineOffset);
+    glVertex2f(r * 8 + 530, lineHeight + lineOffset);
+    glEnd();
 }

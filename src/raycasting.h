@@ -2,9 +2,9 @@
 #define RAYCASTING_H
 
 #include <GLFW/glfw3.h>
-#include "draw.h"
 #include <cmath>
 #include <climits>
+#include "draw.h"
 
 // Player position
 extern float px;
