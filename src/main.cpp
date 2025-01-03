@@ -3,6 +3,7 @@
 int main() {
     glfwInit();
 
+    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
     GLFWwindow* window = glfwCreateWindow(1024, 512, "Raycasting", nullptr, nullptr);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     glfwMakeContextCurrent(window);

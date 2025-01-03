@@ -47,11 +47,22 @@ void display(GLFWwindow* window) {
 }
 
 void processInput(GLFWwindow* window) {
+    int offsetX, offsetY;
+
+    pxDelta < 0 ? offsetX = -20 : offsetX = 20;
+    pyDelta < 0 ? offsetY = -20 : offsetY = 20;
+
+    const int ipx = px / 64, ipy = py / 64;
+    const int ipxAddOffsetX = (px + offsetX) / 64, ipyAddOffsetY = (py + offsetY) / 64;
+    int ipxSubOffsetX = (px - offsetX) / 64, ipySubOffsetY = (py - offsetY) / 64;
+
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-        px += pxDelta / 3;
-        py += pyDelta / 3;
+        if (map[ipy * mapX + ipxAddOffsetX] == 0)
+            px += pxDelta / 3;
+        if (map[ipx + mapX * ipyAddOffsetY] == 0)
+            py += pyDelta / 3;
     }
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
         pAngle -= 0.02;
@@ -63,8 +74,10 @@ void processInput(GLFWwindow* window) {
         pyDelta = sin(pAngle) * 5;
     }
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-        px -= pxDelta / 3;
-        py -= pyDelta / 3;
+        if (map[ipy * mapX + ipxSubOffsetX] == 0)
+            px -= pxDelta / 3;
+        if (map[ipx + mapX * ipySubOffsetY] == 0)
+            py -= pyDelta / 3;
     }
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
         pAngle += 0.02;
