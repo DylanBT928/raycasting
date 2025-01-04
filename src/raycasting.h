@@ -23,6 +23,6 @@ void init();
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void display(GLFWwindow* window);
 void processInput(GLFWwindow* window);
-float dist(float x1, float y1, float x2, float y2, float deg);
+float dist(const float x1, const float y1, const float x2, const float y2);
 
 #endif //RAYCASTING_H

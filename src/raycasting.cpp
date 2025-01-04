@@ -54,7 +54,7 @@ void processInput(GLFWwindow* window) {
 
     const int ipx = px / 64, ipy = py / 64;
     const int ipxAddOffsetX = (px + offsetX) / 64, ipyAddOffsetY = (py + offsetY) / 64;
-    int ipxSubOffsetX = (px - offsetX) / 64, ipySubOffsetY = (py - offsetY) / 64;
+    const int ipxSubOffsetX = (px - offsetX) / 64, ipySubOffsetY = (py - offsetY) / 64;
 
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
@@ -90,7 +90,7 @@ void processInput(GLFWwindow* window) {
     }
 }
 
-float dist(float x1, float y1, float x2, float y2, float deg) {
+float dist(const float x1, const float y1, const float x2, const float y2) {
     return sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2));
 }
 

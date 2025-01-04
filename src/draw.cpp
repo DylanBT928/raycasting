@@ -81,7 +81,7 @@ void drawRays() {
             if (const int mapPosition = my * mapX + mx; mapPosition > 0 && mapPosition < mapX * mapY && map[mapPosition] == 1) {
                 hx = rayX;
                 hy = rayY;
-                disH = dist(px, py, hx, hy, rayAngle);
+                disH = dist(px, py, hx, hy);
                 depthOfField = 8;
             }
             // Next line
@@ -130,7 +130,7 @@ void drawRays() {
             if (const int mapPosition = my * mapX + mx; mapPosition > 0 && mapPosition < mapX * mapY && map[mapPosition] == 1) {
                 vx = rayX;
                 vy = rayY;
-                disV = dist(px, py, vx, vy, rayAngle);
+                disV = dist(px, py, vx, vy);
                 depthOfField = 8;
             }
             // Next line
@@ -173,7 +173,6 @@ void drawRays() {
 }
 
 void drawWalls(float disT, const float rayAngle, const float r) {
-    float lineHeight = (mapSize * 512) / disT;
     float sideRays = pAngle - rayAngle;
 
     // Fix fisheye effect
@@ -182,6 +181,8 @@ void drawWalls(float disT, const float rayAngle, const float r) {
     if (sideRays > 2 * M_PI)
         sideRays -= 2 * M_PI;
     disT *= cos(sideRays);
+
+    float lineHeight = (mapSize * 512) / disT;
 
     // Line height
     if (lineHeight > 512)
