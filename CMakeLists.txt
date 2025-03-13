@@ -4,8 +4,16 @@ project(raycasting)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS "-framework Cocoa -framework OpenGL -framework IOKit")
 
-include_directories(/usr/local/include)
-link_directories(/usr/local/lib)
+include(FetchContent)
+FetchContent_Declare(
+        glfw
+        GIT_REPOSITORY https://github.com/glfw/glfw.git
+        GIT_TAG 3.3.8  # You can specify the version you want here
+)
+FetchContent_MakeAvailable(glfw)
+
+include_directories(${glfw_SOURCE_DIR}/include)
+link_directories(${glfw_BINARY_DIR}/src)
 
 set(SOURCE_FILES src/main.cpp
         src/raycasting.cpp
@@ -15,4 +23,4 @@ set(SOURCE_FILES src/main.cpp
 )
 add_executable(raycasting ${SOURCE_FILES})
 
-target_link_libraries(raycasting glfw3)
+target_link_libraries(raycasting glfw)
