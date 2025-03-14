@@ -9,18 +9,6 @@ A raycasting engine implemented in C++ with GLFW, designed to simulate 3D enviro
 - GLFW
 
 
-## Installation
-
-**macOS**:
-1. Download the latest GLFW binary from https://www.glfw.org/download.html.
-2. Extract the files and copy the `include` and `lib` folders into the following directories:
-   ```
-   /include/GLFW  ---> /usr/local/include
-   /lib-universal ---> /usr/local/lib
-   ```
-   
-
-
 ## Contributing
 
 Any contributions made are greatly appreciated and welcomed. For major changes, please open an issue first to discuss what you would like to change.
